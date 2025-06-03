@@ -6,6 +6,7 @@ from odoo import http
 from odoo.http import request
 from odoo.exceptions import ValidationError
 from odoo.addons.website_sale.controllers.main import WebsiteSale
+from odoo.addons.sale.models.sale_order import SaleOrder
 
 from monero import MoneroSubaddress
 
@@ -26,30 +27,33 @@ class MoneroWebsiteSale(WebsiteSale):
         odoo/addons/website_sale/controllers/main.py
         Payment step. This page proposes several
         payment means based on available
-        payment.acquirer. State at this point :
+        payment.provider. State at this point :
          - a draft sales order with lines; otherwise, clean context / session and
            back to the shop
          - no transaction in context / session, or only a draft one, if the customer
-           did go to a payment.acquirer website but closed the tab without
+           did go to a payment.provider website but closed the tab without
            paying / canceling
         """
-        _logger.info("In Payment")
-        order = request.website.sale_get_order()
+        _logger.info("MoneroWebSiteSale: In Payment")
+        order: SaleOrder = request.website.sale_get_order()
         redirection = self.checkout_redirection(order)
         if redirection:
             return redirection
 
         render_values = self._get_shop_payment_values(order, **post)
         render_values["only_services"] = order and order.only_services or False
+        
+        _logger.info(f"render values: {str(render_values)}")
 
-        for acquirer in render_values["acquirers"]:
-            if "monero-rpc" in acquirer.provider:
+        for provider in render_values["providers"]:
+            _logger.info(f"Provider code {provider.code}")
+            if "monero" == str(provider.code):
                 subaddress: MoneroSubaddress | None = None
                 try:
-                    subaddress = acquirer.create_subaddress()
+                    subaddress = provider.create_subaddress()
                 except Exception as e:
                     _logger.error(
-                        f"USER IMPACT: Monero Payment Acquirer "
+                        f"USER IMPACT: Monero Payment Provider "
                         f"experienced an Error with RPC: {e.__class__.__name__}"
                     )
                     raise ValidationError(
@@ -67,7 +71,7 @@ class MoneroWebsiteSale(WebsiteSale):
                 _logger.info(f"new monero payment subaddress generated {subaddress.address}")
 
         if render_values["errors"]:
-            render_values.pop("acquirers", "")
+            render_values.pop("providers", "")
             render_values.pop("tokens", "")
 
         return request.render("website_sale.payment", render_values)

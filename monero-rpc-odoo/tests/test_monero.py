@@ -21,9 +21,9 @@ class MoneroForm(MoneroCommon):
         self.assertEqual(processing_values['amount'], 1111.11, "Amounts do not equal")
 
     def test_feedback_processing(self):
-        self.acquirer.monero_rpc_config_port = 18083
-        self.acquirer.monero_rpc_config_user = "user"
-        self.acquirer.monero_rpc_config_password = "password"
+        self.provider.monero_rpc_config_port = 18083
+        self.provider.monero_rpc_config_user = "user"
+        self.provider.monero_rpc_config_password = "password"
         tx = self.create_transaction(flow='redirect')
         _logger.info(tx.reference)
         _logger.info(tx.provider)
@@ -44,11 +44,11 @@ class MoneroForm(MoneroCommon):
         num_confirmation_required = 0
         with MockRequest(self.env, website=self.website):
             sale_order = self.website.sale_get_order()
-            acs = self.WebsiteSaleController._get_shop_payment_values(sale_order)["acquirers"]
+            acs = self.WebsiteSaleController._get_shop_payment_values(sale_order)["providers"]
             _logger.info(acs)
-            acquirer = next(a for a in acs if acs.provider == "monero-rpc")
+            provider = next(a for a in acs if acs.provider == "monero-rpc")
             transaction = self.env['payment.transaction'].create({
-                'acquirer_id': acquirer,
+                'provider_id': provider,
             })
             sale_order.process_transaction(transaction, token, num_confirmation_required)
 

@@ -5,7 +5,9 @@ from typing_extensions import override
 import logging
 
 from odoo import api, fields
-from odoo.addons.payment.models import payment_acquirer
+
+from odoo.addons.payment.models import payment_provider
+
 
 from monero import (
     MoneroWallet, MoneroSubaddress, MoneroTransferQuery, 
@@ -19,13 +21,14 @@ from ..utils import MoneroWalletManager
 _logger = logging.getLogger(__name__)
 
 
-class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
+
+class MoneroPaymentProvider(payment_provider.PaymentProvider):
     """
-    Inherits from payment.acquirer
+    Inherits from payment.provider
     Custom fields added: is_cryptocurrency, environment, type
     """
 
-    _inherit = "payment.acquirer"
+    _inherit = "payment.provider"
     _recent_transactions = []
 
     # region Missing
@@ -36,8 +39,8 @@ class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
 
     # region Odoo Fields
 
-    provider = fields.Selection(
-        selection_add=[("monero-rpc", "Monero")], ondelete={"monero-rpc": "set default"}
+    code = fields.Selection(
+        selection_add=[("monero", "Monero")], ondelete={"monero": "set default"}
     )
     is_cryptocurrency = fields.Boolean("Cryptocurrency?", default=False)
     # not used right now, could be used to update price data?
@@ -48,6 +51,9 @@ class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
         required=True,
         help="Monero: A Private Digital Currency",
     )
+    support_manual_capture = fields.Boolean(
+        string="Manual Capture Supported", default=True
+    )
     wallet_type = fields.Selection(
         [
             ("full", "Full"),
@@ -55,14 +61,17 @@ class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
         ],
         "Wallet Type",
         default="full",
+        groups='base.group_system'
     )
     wallet_primary_address = fields.Char(
         string="Primary Address",
-        help="Wallet primary address, also known as standard address"       
+        help="Wallet primary address, also known as standard address",
+        groups='base.group_system'       
     )
     wallet_private_view_key = fields.Char(
         string="Private View Key",
-        help="Wallet private view key"
+        help="Wallet private view key",
+        groups='base.group_system'
     )
     network_type = fields.Selection(
         [
@@ -72,26 +81,31 @@ class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
         ],
         "Network Type",
         default="mainnet",
+        groups='base.group_system'
     )
     account_index = fields.Integer(
         string="Account Index",
         help="The wallet's account index to use",
-        default=0
+        default=0,
+        groups='base.group_system'
     )
     rpc_uri = fields.Char(
         string="RPC Uri",
         help="The uri of the Monero RPC",
         default="http://127.0.0.1:18081/",
+        groups='base.group_system'
     )
     rpc_username = fields.Char(
         string="RPC Username",
         help="The user to authenticate with the Monero RPC",
         default=None,
+        groups='base.group_system'
     )
     rpc_password = fields.Char(
         string="RPC Password",
         help="The password to authenticate with the Monero RPC",
         default=None,
+        groups='base.group_system'
     )
     num_confirmation_required = fields.Selection(
         [
@@ -107,20 +121,26 @@ class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
         default="0",
         help="Required Number of confirmations "
         "before an order's transactions is set to done",
+        groups='base.group_system'
     )
 
     # endregion
 
-    # region Overrides
+    # region Override Methods
 
     @override
-    def _get_default_payment_method_id(self):
-        self.ensure_one()
-        if self.provider != 'monero-rpc':
-            return super()._get_default_payment_method_id()
-        _logger.warning(self.env)
-        _logger.warning(dir(self.env))
-        return self.env.ref('monero-rpc-odoo.payment_method_monero').id
+    def _compute_feature_support_fields(self) -> None:
+        _dict = dict.fromkeys((
+            'support_express_checkout',
+            'support_fees',
+            'support_manual_capture',
+            'support_refund',
+            'support_tokenization',
+        ), None)
+
+        _dict['support_manual_capture'] = True
+
+        self.update(_dict)
 
     # endregion
 
@@ -180,7 +200,7 @@ class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
         
         query = MoneroTransferQuery()
         query.account_index = index.account_index
-        query.subaddress_indices = [index.index]
+        query.subaddress_indices.append(index.index)
         
         query.tx_query = MoneroTxQuery()
         query.tx_query.is_incoming = True

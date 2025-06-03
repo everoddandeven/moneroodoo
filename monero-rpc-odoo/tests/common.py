@@ -24,9 +24,9 @@ class MoneroCommon(PaymentCommon):
             'is_cryptocurrency': True,
             'type': 'xmr',
         }
-        cls.monero = cls._prepare_acquirer('monero-rpc', update_values=values)
+        cls.monero = cls._prepare_provider('monero', update_values=values)
         cls.currency_xmr = cls._prepare_currency('XMR')
-        cls.acquirer = cls.monero
+        cls.provider = cls.monero
         cls.currency = cls.currency_xmr
 
         cls.sale_order = cls.env['sale.order'].create({

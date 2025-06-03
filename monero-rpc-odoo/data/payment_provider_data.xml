@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="payment_provider_monero" model="payment.provider">
+        <field name="name">Monero RPC</field>
+        <field name="code">monero</field>
+        <field name="image_128" type="base64" file="monero-rpc-odoo/static/description/icon.png"/>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="state">test</field>
+        <field name="redirect_form_view_id" ref="redirect_form"/>
+        <field name="allow_tokenization">False</field>
+        <field name="support_manual_capture">True</field>
+        <field name="pre_msg">
+        <![CDATA[<p>You will be redirected to the Payment information and processing page after clicking on the payment button.</p>]]>
+        </field>
+        <field name="pending_msg">
+        <![CDATA[<p>Waiting for Monero payment. </p>]]>
+        </field>
+        <field name="auth_msg">
+        <![CDATA[<p>Waiting for Monero payment. Refresh manually this page for order updates.</p>]]>
+        </field>
+        <field name="done_msg">
+        <![CDATA[<p><b>
+        Thanks for using Monero for payment.
+        </b></p><br><p>Please note your order number for future reference.</p>]]>
+        </field>
+        <field name="is_cryptocurrency">True</field>
+        <field name="type">xmr</field>
+        <field name="num_confirmation_required">0</field>
+        <field name="wallet_type">full</field>
+        <field name="account_index">0</field>
+        <field name="wallet_primary_address">9vSXTFPQttH8jG8KTjZ9jjhLo1AepGHi5gJkiXaXb8KKaY17bCpFhisAU9ajpddTT6dfZwwRePRBa1mcYHtfA9V7STtjVsP</field>
+        <field name="wallet_private_view_key">8180c385885c12399347ad4152410434dd42301af03d9ca6102819109efa860e</field>
+        <field name="network_type">testnet</field>
+        <field name="rpc_uri">http://node.monerodevs.org:28089</field>
+        <field name="rpc_username"></field>
+        <field name="rpc_password"></field>
+        <field name="display_as">Monero</field>
+    </record>
+
+</odoo>

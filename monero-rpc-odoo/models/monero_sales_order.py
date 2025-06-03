@@ -30,22 +30,22 @@ class MoneroSalesOrder(sale_order.SaleOrder):
     @classmethod
     def _get_address_transfers(cls, transaction, address: str) -> MoneroWalletIncomingTransfers:
         try:
-            transfers = transaction.acquirer_id.get_incoming_unconfirmed_transfers(address)
-
+            transfers = transaction.provider_id.get_incoming_unconfirmed_transfers(address)
+            
             return MoneroWalletIncomingTransfers(transfers)
 
         except Exception as e:
             raise Exception(
-                f"Monero Processing Queue: Monero Payment Acquirer "
+                f"Monero Processing Queue: Monero Payment Provider "
                 f"experienced an Error with RPC: {e}"
             )
 
     @api.model
     def update_transaction(self, transaction, token: payment_token.PaymentToken, num_confirmation_required: int) -> None:
         _logger.warning("------- CHECKPOINT UPDATE TRANSACTION")
-
+        _logger.warning("------- TX STATE: {}".format(transaction.state))
         # update deposit amount
-        incoming_transfers = self._get_address_transfers(transaction, str(token.name))
+        incoming_transfers = self._get_address_transfers(transaction, str(token.payment_details))
         transaction.amount_paid_xmr = MoneroUtils.atomic_units_to_xmr(incoming_transfers.amount)
         amount_paid = transaction.get_amount_paid_xmr()
         amount = transaction.get_amount_xmr()
@@ -59,6 +59,7 @@ class MoneroSalesOrder(sale_order.SaleOrder):
         else:
             transaction.confirmations_required = num_confirmation_required - incoming_transfers.num_confirmations
         
+        _logger.warning("------- TX STATE AFTER EDITS: {}".format(transaction.state))
         _logger.warning("------- TOTAL USD: {}".format(self.amount_total))
         _logger.warning("------- TOTAL XMR: {}".format(transaction.amount_xmr))
         _logger.warning("------- TOTAL LEFT TO PAY XMR: {}".format(transaction.amount_remaining_xmr))
@@ -74,11 +75,12 @@ class MoneroSalesOrder(sale_order.SaleOrder):
     @api.model
     def process_transaction(self, transaction, token: payment_token.PaymentToken, num_confirmation_required: int):
         _logger.warning("------- CHECKPOINT PROCESS TRANSACTION ORDER")
+        _logger.warning("------- TX STATE: {}".format(transaction.state))
         _logger.warning("------- TOTAL USD: {}".format(self.amount_total))
         _logger.warning("------- TOTAL XMR: {}".format(transaction.amount_xmr))
         _logger.warning("------- TOTAL LEFT TO PAY XMR: {}".format(transaction.amount_remaining_xmr))
 
-        incoming_transfers = self._get_address_transfers(transaction, str(token.name))
+        incoming_transfers = self._get_address_transfers(transaction, str(token.payment_details))
         transfers = incoming_transfers.transfers
 
         _logger.warning("Incoming Payments: {}".format(len(transfers)))
@@ -95,8 +97,8 @@ class MoneroSalesOrder(sale_order.SaleOrder):
                 self.action_cancel()
                 self.write({"state": "cancel", "is_expired": "true"})
                 log_msg = (
-                    f"PaymentAcquirer: {transaction.acquirer_id.provider} "
-                    f"Subaddress: {token.name} "
+                    f"PaymentProvider: {transaction.provider_id.code} "
+                    f"Subaddress: {token.payment_details} "
                     "Status: No transaction found. Too much time has passed, "
                     "customer has most likely not sent payment. "
                     f"Cancelling order # {self.id}. "
@@ -106,8 +108,8 @@ class MoneroSalesOrder(sale_order.SaleOrder):
                 return log_msg
             else:
                 exception_msg = (
-                    f"PaymentAcquirer: {transaction.acquirer_id.provider} "
-                    f"Subaddress: {token.name} "
+                    f"PaymentProvider: {transaction.provider_id.code} "
+                    f"Subaddress: {token.payment_details} "
                     "Status: No transaction found. "
                     "TX probably hasn't been added to a block or mem-pool yet. "
                     "This is fine. "
@@ -117,8 +119,8 @@ class MoneroSalesOrder(sale_order.SaleOrder):
 
         else:
             conf_err_msg = (
-                f"PaymentAcquirer: {transaction.acquirer_id.provider} "
-                f"Subaddress: {token.name} "
+                f"PaymentProvider: {transaction.provider_id.code} "
+                f"Subaddress: {token.payment_details} "
                 "Status: Waiting for more confirmations "
                 f"Confirmations: current {incoming_transfers.num_confirmations}, "
                 f"expected {num_confirmation_required} "
@@ -145,7 +147,7 @@ class MoneroSalesOrder(sale_order.SaleOrder):
                 #transaction.write({"state": "done", "is_processed": "true"})
                 _logger.info(
                     f"Monero payment recorded for sale order: {self.id}, "
-                    f"associated with subaddress: {token.name}"
+                    f"associated with subaddress: {token.payment_details}"
                 )
                 _logger.warning("amount: {}".format(self.amount_total))
                 self.with_context(send_email=True).action_confirm()

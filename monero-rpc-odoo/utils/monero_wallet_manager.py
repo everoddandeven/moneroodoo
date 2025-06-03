@@ -24,7 +24,7 @@ class MoneroWalletManagerListener(MoneroWalletListener):
 
 class MoneroWalletManager:
 
-    _listener: MoneroWalletManagerListener = MoneroWalletManagerListener()
+    #_listener: MoneroWalletManagerListener = MoneroWalletManagerListener()
     _wallet: MoneroWallet | None = None
     _FULL_WALLET_PATH: str = "monero_odoo_wallet"
     _FULL_WALLET_PASSWORD: str = ""

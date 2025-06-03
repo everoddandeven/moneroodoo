@@ -12,5 +12,5 @@ class MoneroAccountPaymentMethod(account_payment_method.AccountPaymentMethod):
     @override
     def _get_payment_method_information(self):
         res = super()._get_payment_method_information()
-        res['monero-rpc'] = {'mode': 'unique', 'domain': [('type', '=', 'bank')]}
+        res['monero'] = {'mode': 'unique', 'domain': [('type', '=', 'bank')]}
         return res
