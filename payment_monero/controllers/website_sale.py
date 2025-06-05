@@ -28,11 +28,11 @@ class MoneroWebsiteSale(WebsiteSale):
         odoo/addons/website_sale/controllers/main.py
         Payment step. This page proposes several
         payment means based on available
-        payment.acquirer. State at this point :
+        payment.provider. State at this point :
          - a draft sales order with lines; otherwise, clean context / session and
            back to the shop
          - no transaction in context / session, or only a draft one, if the customer
-           did go to a payment.acquirer website but closed the tab without
+           did go to a payment.provider website but closed the tab without
            paying / canceling
         """
         _logger.info("In Payment")
@@ -44,18 +44,18 @@ class MoneroWebsiteSale(WebsiteSale):
         render_values = self._get_shop_payment_values(order, **post)
         render_values["only_services"] = order and order.only_services or False
 
-        for acquirer in render_values["acquirers"]:
-            if "monero" in acquirer.provider:
-                if acquirer.is_wallet_loaded():
+        for provider in render_values["providers"]:
+            if "monero" in provider.code:
+                if provider.is_wallet_loaded():
                     # wallet already loaded
                     break
 
                 wallet: MoneroWallet | None = None
                 try:
-                    wallet = acquirer.get_wallet()
+                    wallet = provider.get_wallet()
                 except Exception as e:
                     _logger.error(
-                        f"USER IMPACT: Monero Payment Acquirer "
+                        f"USER IMPACT: Monero Payment Provider "
                         f"experienced an Error with wallet: {str(e)}"
                     )
                     raise ValidationError(
@@ -72,7 +72,7 @@ class MoneroWebsiteSale(WebsiteSale):
                 _logger.info(f"Monero wallet loaded, restore height {wallet.get_restore_height()}")
 
         if render_values["errors"]:
-            render_values.pop("acquirers", "")
+            render_values.pop("providers", "")
             render_values.pop("tokens", "")
 
         return request.render("website_sale.payment", render_values)

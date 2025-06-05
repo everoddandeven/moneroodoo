@@ -71,10 +71,10 @@ class MoneroController(http.Controller):
                 f"created transaction: {transaction.id} "
                 f"for payment token: {token.id}"
             )
-            if transaction.acquirer_id.is_cryptocurrency:
+            if transaction.provider_id.is_cryptocurrency:
                 _logger.info(
                     f"Processing cryptocurrency "
-                    f"payment acquirer: {transaction.acquirer_id.name}"
+                    f"payment provider: {transaction.provider_id.name}"
                 )
                 _logger.info(
                     f"setting sales_order state to "
@@ -93,11 +93,11 @@ class MoneroController(http.Controller):
             return request.redirect("/payment/process")
 
     @http.route(_accept_url, type='http', auth='public', methods=['POST'], csrf=False)
-    def transfer_form_feedback(self, sale_id=None, **post):
-        # calls monero_transaction _get_tx_from_feedback_data
+    def transfer_form_notification(self, sale_id=None, **post):
+        # calls monero_transaction _get_tx_from_notification_data
         if sale_id:
             request.session["sale_last_order_id"] = sale_id
-        request.env['payment.transaction'].sudo()._handle_feedback_data('monero', post)
+        request.env['payment.transaction'].sudo()._handle_notification_data('monero', post)
         return request.redirect("/payment/status")
 
 

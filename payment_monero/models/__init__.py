@@ -1,4 +1,4 @@
-from . import account_payment_method, exceptions, payment_acquirer, payment_transaction, sale_order
+from . import account_payment_method, exceptions, payment_provider, payment_transaction, sale_order
 
 # TODO automate prices list for currencies,
 #  the lists would be updated at a chosen interval with the correct conversion

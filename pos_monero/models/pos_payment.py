@@ -110,7 +110,7 @@ class MoneroPosPayment(pos_payment.PosPayment):
             return MoneroWalletIncomingTransfers(transfers)
         except Exception as e:
             raise Exception(
-                f"Monero Processing Queue: Monero Payment Acquirer "
+                f"Monero Processing Queue: Monero Payment Provider "
                 f"experienced an Error with RPC: {e}"
             )
     

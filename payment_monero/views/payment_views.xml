@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="acquirer_form_monero" model="ir.ui.view">
-        <field name="name">Monero Acquirer Form</field>
-        <field name="model">payment.acquirer</field>
-        <field name="inherit_id" ref="payment.payment_acquirer_form"/>
+    <record id="provider_form_monero" model="ir.ui.view">
+        <field name="name">Monero Provider Form</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
         <field name="arch" type="xml">
-            <xpath expr='//group[@name="acquirer"]' position='inside'>
-                <group attrs="{'invisible': [('provider', '!=', 'monero')]}">
+            <group name="provider_credentials" position='inside'>
+                <group attrs="{'invisible': [('code', '!=', 'monero')]}">
+                    <field name="redirect_form_view_id" ref="redirect_form"/>
                     <field name="is_cryptocurrency" readonly="1" groups="base.group_no_one"/>
                     <field name="wallet_type" on_change="update_rpc_server()"/>
                     <field name="account_index" />
@@ -37,7 +38,7 @@
                         How to configure a Monero Daemon RPC?
                     </a>
                 </group>
-            </xpath>
+            </group>
         </field>
     </record>
 </odoo>

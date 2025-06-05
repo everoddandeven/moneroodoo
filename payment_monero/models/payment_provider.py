@@ -5,7 +5,7 @@ from typing_extensions import override
 import logging
 
 from odoo import api, fields
-from odoo.addons.payment.models import payment_acquirer
+from odoo.addons.payment.models import payment_provider
 
 from monero import (
     MoneroWallet, MoneroSubaddress, MoneroTransferQuery, 
@@ -21,13 +21,13 @@ from .exceptions import MoneroWalletNotSynchronizedError
 _logger = logging.getLogger(__name__)
 
 
-class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
+class MoneroPaymentProvider(payment_provider.PaymentProvider):
     """
-    Inherits from payment.acquirer
+    Inherits from payment.provider
     Custom fields added: is_cryptocurrency, environment, type
     """
 
-    _inherit = "payment.acquirer"
+    _inherit = "payment.provider"
     _recent_transactions = []
 
     # region Missing
@@ -38,7 +38,7 @@ class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
 
     # region Odoo Fields
 
-    provider = fields.Selection(
+    code = fields.Selection(
         selection_add=[("monero", "Monero")], ondelete={"monero": "set default"}
     )
     is_cryptocurrency = fields.Boolean("Cryptocurrency?", default=False)
@@ -58,15 +58,18 @@ class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
         "Wallet Type",
         default="full",
         required=True,
-        help="Use a local Full Wallet or setup a remote RPC Wallet"
+        help="Use a local Full Wallet or setup a remote RPC Wallet",
+        groups='base.group_system',
     )
     wallet_primary_address = fields.Char(
         string="Primary Address",
-        help="Wallet primary address, also known as standard address"       
+        help="Wallet primary address, also known as standard address",
+        groups='base.group_system',      
     )
     wallet_private_view_key = fields.Char(
         string="Private View Key",
-        help="Wallet private view key"
+        help="Wallet private view key",
+        groups='base.group_system',
     )
     network_type = fields.Selection(
         [
@@ -77,28 +80,33 @@ class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
         "Network Type",
         default="mainnet",
         required=True,
-        help="Wallet network type."
+        help="Wallet network type.",
+        groups='base.group_system'
     )
     account_index = fields.Integer(
         string="Account Index",
         help="The wallet's account index to use",
         required=True,
-        default=0
+        default=0,
+        groups='base.group_system'
     )
     rpc_uri = fields.Char(
         string="RPC Uri",
         help="The uri of the Monero Daemon RPC or Wallet RPC",
         default="http://127.0.0.1:18081/",
+        groups='base.group_system',
     )
     rpc_username = fields.Char(
         string="RPC Username",
         help="The user to authenticate with the Monero Daemon or Wallet RPC",
         default=None,
+        groups='base.group_system',
     )
     rpc_password = fields.Char(
         string="RPC Password",
         help="The password to authenticate with the Monero Daemon or Wallet RPC",
         default=None,
+        groups='base.group_system',
     )
     num_confirmation_required = fields.Selection(
         [
@@ -115,6 +123,7 @@ class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
         default="0",
         help="Required Number of confirmations "
         "before an order's transactions is set to done",
+        groups='base.group_system',
     )
     exchange_rate_api = fields.Selection(
         [
@@ -125,6 +134,7 @@ class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
         default="kraken",
         required=True,
         help="Exchange rate API to retrieve monero price",
+        groups='base.group_system',
     )
     payment_expiration = fields.Selection(
         [
@@ -143,25 +153,11 @@ class MoneroPaymentAcquirer(payment_acquirer.PaymentAcquirer):
         "Payment Expiration",
         default="15",
         required=True,
-        help="Payment deadline for an order after its creation"
+        help="Payment deadline for an order after its creation",
+        groups='base.group_system'
     )
 
     # endregion
-
-    # region Overrides
-
-    @override
-    def _get_default_payment_method_id(self):
-        self.ensure_one()
-        if self.provider != 'monero':
-            return super()._get_default_payment_method_id()
-        _logger.warning(self.env)
-        _logger.warning(dir(self.env))
-        return self.env.ref('payment_monero.payment_method_monero').id
-
-    # endregion
-
-    # region Public Methods
 
     def is_wallet_loaded(self) -> bool:
         return MoneroWalletManager.is_wallet_loaded()

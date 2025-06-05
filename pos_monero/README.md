@@ -26,8 +26,8 @@ components. https://monero-python.readthedocs.io/en/latest/quickstart.html
         * https://github.com/OCA/queue
     * pos_monero
         * https://github.com/monero-integrations/moneroodoo
-        * The Monero payment acquirer is configured similar to other payment acquirers
-            * https://www.odoo.com/documentation/user/14.0/general/payment_acquirers/payment_acquirers.html#configuration
+        * The Monero payment provider is configured similar to other payment providers
+            * https://www.odoo.com/documentation/user/14.0/general/payment_providers/payment_providers.html#configuration
     * Currency rate
       * You will need to manually add currency rate for Monero
       * https://www.odoo.com/documentation/user/14.0/accounting/others/multicurrencies/how_it_works.html

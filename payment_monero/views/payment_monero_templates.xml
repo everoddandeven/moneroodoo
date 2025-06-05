@@ -3,12 +3,12 @@
     <template id="xmr_payment_form">
         <input type="hidden" name="data_set" data-create-route="/shop/payment/monero/submit"/>
         <input type="hidden" name="type" t-att-value="'XMR'"/>
-        <input type="hidden" name="acquirer_id" t-att-value="id"/>
+        <input type="hidden" name="provider_id" t-att-value="id"/>
         <input t-if="return_url" type="hidden" name="return_url" t-att-value="return_url"/>
         <input t-if="partner_id" type="hidden" name="partner_id" t-att-value="partner_id"/>
     </template>
 
-    <template id="xmr_acquirer_button"></template>
+    <template id="xmr_provider_button"></template>
 
     <template id="redirect_form">
         <form t-att-action="api_url" method="post">
@@ -75,7 +75,7 @@
                         console.log(e);
                     });
             </script>
-            <t t-if="payment_tx_id.acquirer_id.is_cryptocurrency == True and payment_tx_id.state == 'done'">
+            <t t-if="payment_tx_id.provider_id.is_cryptocurrency == True and payment_tx_id.state == 'done'">
                 Amount paid <t t-raw="payment_tx_id.amount_paid_xmr"/> XMR
 
                 <!--PATCH when the payment is done the page refreshes and
@@ -84,14 +84,14 @@
                     where / when / how that would be execute-->
                 <button id="copy_address_button" class="copy_btn"
                             name="copy_address_button"
-                            t-att-data-clipboard-text="payment_tx_id.token_id.name"
+                            t-att-data-clipboard-text="payment_tx_id.token_id.payment_details"
                             style="font-size:20px"
                             hidden="true"
                             title="Copy payment address">
                         <i class="fa fa-clipboard"></i>
                 </button>
             </t>
-            <t t-if="payment_tx_id.acquirer_id.is_cryptocurrency == True and payment_tx_id.state == 'cancel'">
+            <t t-if="payment_tx_id.provider_id.is_cryptocurrency == True and payment_tx_id.state == 'cancel'">
 
                 <!--PATCH when the payment is done the page refreshes and
                 clipboardjs still expects a button to be there
@@ -99,27 +99,27 @@
                     where / when / how that would be execute-->
                 <button id="copy_address_button" class="copy_btn"
                             name="copy_address_button"
-                            t-att-data-clipboard-text="payment_tx_id.token_id.name"
+                            t-att-data-clipboard-text="payment_tx_id.token_id.payment_details"
                             style="font-size:20px"
                             hidden="true"
                             title="Copy payment address">
                         <i class="fa fa-clipboard"></i>
                 </button>
             </t>
-            <t t-if="payment_tx_id.acquirer_id.is_cryptocurrency == True and payment_tx_id.token_id.name and payment_tx_id.state == 'pending' and not payment_tx_id.fully_paid">
+            <t t-if="payment_tx_id.provider_id.is_cryptocurrency == True and payment_tx_id.token_id.payment_details and payment_tx_id.state == 'pending' and not payment_tx_id.fully_paid">
                 <p>Deposit <t t-raw="payment_tx_id.amount_remaining_xmr"/> XMR to the address below:
                     <ul>
                         <b>
                             <li style="clear: both;">
                                 <button id="copy_address_button" class="copy_btn"
                                         name="copy_address_button"
-                                        t-att-data-clipboard-text="payment_tx_id.token_id.name"
+                                        t-att-data-clipboard-text="payment_tx_id.token_id.payment_details"
                                         style="font-size:20px"
                                         title="Copy payment address">
                                     <i class="fa fa-clipboard"></i>
                                 </button>
                                 <a
-                                        t-att-href="'monero:%s?tx_amount=%s&amp;tx_description=%s' % (payment_tx_id.token_id.name, payment_tx_id.amount, order.name)" target="_blank">
+                                        t-att-href="'monero:%s?tx_amount=%s&amp;tx_description=%s' % (payment_tx_id.token_id.payment_details, payment_tx_id.amount, order.name)" target="_blank">
                                     <button id="open_wallet" class="open_btn"
                                         name="open_wallet"
                                         style="font-size:20px"
@@ -130,11 +130,11 @@
                                 <button id="show_qr" class="show_qr"
                                         name="show_qr" style="font-size:20px"
                                         title="Show QR Code"
-                                        t-attf-onclick="enable_qr('monero:{{payment_tx_id.token_id.name}}?tx_amount={{payment_tx_id.amount}}&amp;tx_description={{order.name}}&amp;recipient_name={{order.company_id.name}}')">
+                                        t-attf-onclick="enable_qr('monero:{{payment_tx_id.token_id.payment_details}}?tx_amount={{payment_tx_id.amount}}&amp;tx_description={{order.name}}&amp;recipient_name={{order.company_id.name}}')">
                                     <i class="fa fa-qrcode"></i>
                                 </button>
                                 <div id="monero_payment_address">
-                                    <t t-raw="payment_tx_id.token_id.name"/>
+                                    <t t-raw="payment_tx_id.token_id.payment_details"/>
                                 </div>
                                 <div id="monero_payment_expiration">
                                     Payment will expire at <t t-raw="payment_tx_id.expiration"/>
@@ -145,13 +145,13 @@
                 </p>
             </t>
 
-            <t t-if="payment_tx_id.acquirer_id.is_cryptocurrency == True and payment_tx_id.token_id.name and payment_tx_id.state == 'pending' and payment_tx_id.fully_paid">
+            <t t-if="payment_tx_id.provider_id.is_cryptocurrency == True and payment_tx_id.token_id.payment_details and payment_tx_id.state == 'pending' and payment_tx_id.fully_paid">
                 <p>Monero payment received.
 
                 Waiting for <t t-raw="payment_tx_id.confirmations_required"/> network confirmations.
                 <button id="copy_address_button" class="copy_btn"
                             name="copy_address_button"
-                            t-att-data-clipboard-text="payment_tx_id.token_id.name"
+                            t-att-data-clipboard-text="payment_tx_id.token_id.payment_details"
                             style="font-size:20px"
                             hidden="true"
                             title="Copy payment address">

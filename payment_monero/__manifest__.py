@@ -6,14 +6,13 @@
     # Categories can be used to filter modules in modules listing
     # for the full list
     "category": "Accounting",
-    "version": "15.0",
+    "version": "16.0",
     "license": "AGPL-3",
     # any module necessary for this one to work correctly
     "depends": [
         "website_sale",
         "website_payment",
         "website",
-        "payment_transfer",
         "payment",
         "base_setup",
         "web",
@@ -25,7 +24,7 @@
         "views/payment_monero_templates.xml",
         "views/payment_views.xml",
         "data/currency.xml",
-        "data/payment_acquirer.xml",
+        "data/payment_provider.xml",
         "data/payment_icon_data.xml",
         "data/queue.xml",
     ],

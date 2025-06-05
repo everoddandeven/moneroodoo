@@ -6,7 +6,7 @@
     # Categories can be used to filter modules in modules listing
     # for the full list
     "category": "Accounting",
-    "version": "15.0",
+    "version": "16.0",
     "license": "AGPL-3",
     # any module necessary for this one to work correctly
     "depends": [
