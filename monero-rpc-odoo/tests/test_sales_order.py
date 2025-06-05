@@ -243,7 +243,7 @@ class TestMoneroSalesOrder(TestWebsiteSaleCommon):
             {"name": "Monero RPC", "journal_id": 1}
         )
 
-    @patch("odoo.addons.monero-rpc-odoo.models.monero_acq.JSONRPCWallet")
+    @patch("odoo.addons.monero_rpc_odoo.models.monero_acq.JSONRPCWallet")
     def test_sale_order_process_transaction(self, mock_backend):
         """Test processing of monero transactions
         - The class: MoneroSalesOrder process_transaction defined to interface with

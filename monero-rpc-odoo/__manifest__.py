@@ -24,9 +24,9 @@
         "views/payment_monero_templates.xml",
         "views/payment_provider_views.xml",
 
+        "data/payment_method_data.xml",
         "data/payment_provider_data.xml",
         "data/currency.xml",
-        "data/payment_icon_data.xml",
         "data/queue.xml",
     ],
     # only loaded in demonstration mode

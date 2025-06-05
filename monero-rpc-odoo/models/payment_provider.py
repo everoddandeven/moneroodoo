@@ -132,15 +132,22 @@ class MoneroPaymentProvider(payment_provider.PaymentProvider):
     def _compute_feature_support_fields(self) -> None:
         _dict = dict.fromkeys((
             'support_express_checkout',
-            'support_fees',
             'support_manual_capture',
             'support_refund',
             'support_tokenization',
         ), None)
-
+        super()._compute_feature_support_fields()
         _dict['support_manual_capture'] = True
 
         self.update(_dict)
+
+    @override
+    def _get_default_payment_method_codes(self):
+        """ Override of `payment` to return the default payment method codes. """
+        default_codes = super()._get_default_payment_method_codes()
+        if self.code != 'monero':
+            return default_codes
+        return ["monero"]
 
     # endregion
 

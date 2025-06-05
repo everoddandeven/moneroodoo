@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="payment.payment_provider_form"/>
         <field name="arch" type="xml">
             <group name="provider_credentials" position='inside'>
-                <group attrs="{'invisible': [('code', '!=', 'monero')]}">
+                <group>
                     <field name="is_cryptocurrency" readonly="1" groups="base.group_no_one"/>
                     <field name="wallet_type" on_change="update_rpc_server()"/>
                     <field name="account_index" />
