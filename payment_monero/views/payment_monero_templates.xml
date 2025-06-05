@@ -41,7 +41,7 @@
                 }
             </script>
         </xpath>
-        <xpath expr="//*[@class='card mt-3']" position="before">
+        <xpath expr="//div[@id='oe_structure_website_sale_confirmation_2']" position="before">
             <div id="qr_div1" class="card mt-3" style="display:none">
                 <div id="qr_div2" class="card-body" style="display:none">
                     <div id="qrcode_monero_payment"></div>
@@ -53,6 +53,7 @@
     <template id="monero_payment_confirmation"
                 inherit_id="website_sale.payment_confirmation_status">
         <xpath expr="//*[@class='card-header']" position="inside">
+            <t t-set="payment_tx_id" t-value="order.transaction_ids and order.transaction_ids[0]"/>
             <script type="text/javascript" src="/payment_monero/static/src/js/jquery.qrcode.min.js"></script>
             <script>
                 var btn = document.getElementById('copy_address_button');
@@ -76,7 +77,7 @@
                     });
             </script>
             <t t-if="payment_tx_id.provider_id.is_cryptocurrency == True and payment_tx_id.state == 'done'">
-                Amount paid <t t-raw="payment_tx_id.amount_paid_xmr"/> XMR
+                Amount paid <t t-out="payment_tx_id.amount_paid_xmr"/> XMR
 
                 <!--PATCH when the payment is done the page refreshes and
                 clipboardjs still expects a button to be there
@@ -107,7 +108,7 @@
                 </button>
             </t>
             <t t-if="payment_tx_id.provider_id.is_cryptocurrency == True and payment_tx_id.token_id.payment_details and payment_tx_id.state == 'pending' and not payment_tx_id.fully_paid">
-                <p>Deposit <t t-raw="payment_tx_id.amount_remaining_xmr"/> XMR to the address below:
+                <p>Deposit <t t-out="payment_tx_id.amount_remaining_xmr"/> XMR to the address below:
                     <ul>
                         <b>
                             <li style="clear: both;">
@@ -134,10 +135,10 @@
                                     <i class="fa fa-qrcode"></i>
                                 </button>
                                 <div id="monero_payment_address">
-                                    <t t-raw="payment_tx_id.token_id.payment_details"/>
+                                    <t t-out="payment_tx_id.token_id.payment_details"/>
                                 </div>
                                 <div id="monero_payment_expiration">
-                                    Payment will expire at <t t-raw="payment_tx_id.expiration"/>
+                                    Payment will expire at <t t-out="payment_tx_id.expiration"/>
                                 </div>
                             </li>
                         </b>
@@ -148,7 +149,7 @@
             <t t-if="payment_tx_id.provider_id.is_cryptocurrency == True and payment_tx_id.token_id.payment_details and payment_tx_id.state == 'pending' and payment_tx_id.fully_paid">
                 <p>Monero payment received.
 
-                Waiting for <t t-raw="payment_tx_id.confirmations_required"/> network confirmations.
+                Waiting for <t t-out="payment_tx_id.confirmations_required"/> network confirmations.
                 <button id="copy_address_button" class="copy_btn"
                             name="copy_address_button"
                             t-att-data-clipboard-text="payment_tx_id.token_id.payment_details"

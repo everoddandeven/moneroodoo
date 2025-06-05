@@ -116,9 +116,9 @@ class MoneroPaymentTransaction(payment_transaction.PaymentTransaction):
         token: payment_token.PaymentToken = self.env['payment.token'].create({
             'provider_ref': self.reference,
             'provider_id': self.provider_id.id,
+            'payment_method_id': self.payment_method_id.id, # type: ignore
             'payment_details': token_name,  # Already padded with 'X's
             'partner_id': partner_id,
-            'verified': True,  # The payment is authorized, so the payment method is valid
             'active': True, # The payment shall only be used once
         })
         self.write({

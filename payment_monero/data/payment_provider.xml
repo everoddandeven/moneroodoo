@@ -37,13 +37,12 @@
             <field name="rpc_uri">http://127.0.0.1:18081</field>
             <field name="rpc_username"></field>
             <field name="rpc_password"></field>
-            <field name="display_as">Monero</field>
+            <field name="payment_method_ids"
+               eval="[Command.set([
+                         ref('payment_monero.payment_method_monero'),
+                     ])]"
+            />
         </record>
 
-        <record id="payment_method_monero" model="account.payment.method">
-            <field name="name">Monero</field>
-            <field name="code">monero</field>
-            <field name="payment_type">inbound</field>
-        </record>
     </data>
 </odoo>

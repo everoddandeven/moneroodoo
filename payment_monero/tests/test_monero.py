@@ -42,7 +42,7 @@ class MoneroForm(MoneroCommon):
         num_confirmation_required = 0
         with MockRequest(self.env, website=self.website):
             sale_order = self.website.sale_get_order()
-            acs = self.WebsiteSaleController._get_shop_payment_values(sale_order)["providers"]
+            acs = self.WebsiteSaleController._get_shop_payment_values(sale_order)["providers_sudo"]
             _logger.info(acs)
             provider = next(a for a in acs if acs.provider == "monero")
             transaction = self.env['payment.transaction'].create({

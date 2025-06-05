@@ -44,7 +44,7 @@ class MoneroWebsiteSale(WebsiteSale):
         render_values = self._get_shop_payment_values(order, **post)
         render_values["only_services"] = order and order.only_services or False
 
-        for provider in render_values["providers"]:
+        for provider in render_values["providers_sudo"]:
             if "monero" in provider.code:
                 if provider.is_wallet_loaded():
                     # wallet already loaded
@@ -72,7 +72,7 @@ class MoneroWebsiteSale(WebsiteSale):
                 _logger.info(f"Monero wallet loaded, restore height {wallet.get_restore_height()}")
 
         if render_values["errors"]:
-            render_values.pop("providers", "")
-            render_values.pop("tokens", "")
+            render_values.pop("providers_sudo", "")
+            render_values.pop("tokens_sudo", "")
 
         return request.render("website_sale.payment", render_values)
